@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "pi-led-clock"
+version = "0.1.0"
+description = "show a clock on a raspberry pi led screen"
+authors = ["Robert Evans <robermar2@gmail.com>"]
+readme = "README.md"
+packages = [{include = "pi_led_clock"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pygame = "^2.6.1"
+typer = "^0.15.1"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
