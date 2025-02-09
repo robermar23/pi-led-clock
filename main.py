@@ -20,7 +20,7 @@ def start_clock(
   screen_width: int = typer.Argument(800, help="Screen width (e.g., 800)"),
   screen_height: int = typer.Argument(480, help="Screen height (e.g., 480)"),
   utc_offset: int = typer.Argument(-5, help="UTC Offset for clock"),
-  zip_code: str = typer.Argument("21047", help="Zipcode to determine weather for"),
+  zip_code: str = typer.Argument("xxxxx", help="Zipcode to determine weather for"),
   country_code: str = typer.Argument("us", help="Country code to determine weather for"),
   open_weather_api_key: str = typer.Argument("xxx", help="openweathermap.org api key")
 ):
