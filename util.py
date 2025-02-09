@@ -3,6 +3,7 @@ import sys
 import pygame
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 # Constants
 BLACK = (0, 0, 0)
@@ -54,3 +55,14 @@ def setup_display(display: str, video_driver: str, screen_width: int, screen_hei
 
     #this screen object is what is used to create everything else
     return screen 
+
+def interpolate_color(color1, color2, factor):
+    """Linearly interpolate between two colors."""
+    return tuple(int(c1 + (c2 - c1) * factor) for c1, c2 in zip(color1, color2))
+
+def get_config(file_path = "config.json"):
+    """Loads a JSON file and returns an object with dynamic attributes."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    
+    return json.loads(json.dumps(data), object_hook=lambda d: SimpleNamespace(**d))

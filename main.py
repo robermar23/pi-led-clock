@@ -2,8 +2,12 @@ import typer
 import pygame
 import datetime
 import sys
-from util import setup_display, get_current_time
-from weather import get_weather, get_weather_background
+import time
+from util import setup_display, get_current_time, interpolate_color, get_config
+from weather import get_weather, load_weather_icon
+from background import get_background_color, draw_background_gradient, get_sun_times
+from location import get_location
+
 
 app = typer.Typer()
 
@@ -17,8 +21,10 @@ def draw_text(surface, text, font, color, position, glow_color, glow_radius):
     # Render the main text
     text_surface = font.render(text, True, color)
     surface.blit(text_surface, position)
-    
-@app.command()
+
+@app.command(
+    context_settings={"ignore_unknown_options": True}
+)
 def start_clock(
   display: str = typer.Argument(":0", help="Display to run the show on (e.g., ':0')"),
   video_driver: str = typer.Argument("x11", help="Video driver to use (e.g., 'x11')"),
@@ -26,7 +32,8 @@ def start_clock(
   screen_height: int = typer.Argument(480, help="Screen height (e.g., 480)"),
   utc_offset: int = typer.Argument(-5, help="UTC Offset for clock"),
   zip_code: str = typer.Argument("21047", help="Zipcode to determine weather for"),
-  country_code: str = typer.Argument("us", help="Country code to determine weather for")
+  country_code: str = typer.Argument("us", help="Country code to determine weather for"),
+  open_weather_api_key: str = typer.Argument("xxx", help="openweathermap.org api key")
 ):
     """
     Start the clock
@@ -50,7 +57,17 @@ def start_clock(
     frame_count = 0
 
     # Fetch initial weather data
-    temp, weather, feels_like = get_weather(zip_code, country_code)
+    temp, feels_like, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
+    if weather_reports:
+        for report in weather_reports:
+            report["weather_icon"] = load_weather_icon(report["image_url"])
+            
+    last_weather_update = time.time()  # Timestamp of the last weather update
+
+    location = get_location()
+    sun_rise, sun_set = get_sun_times(location)
+    background_top_color = get_background_color(location, sun_rise, sun_set)
+    background_bottom_color = interpolate_color(background_top_color, (0, 0, 0), 0.5)  # Darker shade
 
     while running:
         # Handle events
@@ -58,18 +75,29 @@ def start_clock(
             if event.type == pygame.QUIT:
                 running = False
 
+        screen.fill((0, 0, 0))  # Clear screen
+        
+        # Update weather data every hour
+        current_time = time.time()
+        if current_time - last_weather_update >= 3600:  # 3600 seconds = 1 hour
+            temp, feels_like, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
+            if weather_reports:
+                for report in weather_reports:
+                    report["weather_icon"] = load_weather_icon(report["image_url"])
+    
+            last_weather_update = current_time
+            
+            # Get gradient colors
+            sun_rise, sun_set = get_sun_times(location)
+            background_top_color = get_background_color(location, sun_rise, sun_set)
+            background_bottom_color = interpolate_color(background_top_color, (0, 0, 0), 0.5)  # Darker shade
+
+        draw_background_gradient(screen, screen_height, screen_width, background_top_color, background_bottom_color)
+
         # Get current time and date
         now = get_current_time(utc_offset)
         current_time = now.strftime("%H:%M:%S")
         current_date = now.strftime("%A, %B %d, %Y")
-
-        # Update background color based on time
-        # background_color = get_background_color(now.hour)
-        # screen.fill(background_color)
-
-         # Update the background based on the weather
-         # Update the background with weather graphics
-        get_weather_background(screen, weather, (screen_width, screen_height), frame_count)
 
         # Increment frame count for animation
         frame_count += 1
@@ -92,6 +120,17 @@ def start_clock(
             (screen_width - weather_text_width) // 2,
             date_position[1] + date_text_height + 20,
         )
+        
+        if weather_reports:
+            weather_report_base_x = 10
+            weather_report_base_y = 10
+            for report in weather_reports:
+                screen.blit(report["weather_icon"], (weather_report_base_x, weather_report_base_y))
+                weather_report_base_x = weather_report_base_y = (weather_report_base_x + 110)
+
+         # Draw the moon only at night
+        if now < sun_rise or now > sun_set:
+            draw_moon(screen, timezone)
 
         # Draw time and date with glow
         draw_text(screen,current_time,clock_font,(255, 255, 255),clock_position,(0, 0, 0),3)
