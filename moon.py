@@ -7,32 +7,45 @@ def get_moon_phase(timezone):
     """Calculate the current moon phase as a value between 0 (new moon) and 1 (full moon)."""
     now = datetime.datetime.now(pytz.timezone(timezone))
     moon_phase = ephem.Moon(now).phase  # Returns 0 to 29.53
-    return moon_phase / 29.53  # Normalize to 0-1 scale
-  
+    #return moon_phase / 29.53  # Normalize to 0-1 scale
+    return moon_phase % 8
+
 def draw_moon(surface, timezone):
     """Draw the moon with the correct phase."""
     moon_phase = get_moon_phase(timezone)  # Get phase as a value between 0 and 1
+    print (f"moon phase: {moon_phase}")
 
     width = surface.get_width()
     height = surface.get_height()
     
     # Moon settings
-    moon_radius = min(width, height) // 8  # Scale moon size dynamically
-    moon_x = width - moon_radius - 10  # Adjust to fit in the top-right corner
-    moon_y = moon_radius + 10  # Adjust to fit in the top-right corner
+    radius = min(width, height) // 8  # Scale moon size dynamically
+    x = width - radius - 10  # Adjust to fit in the top-right corner
+    y = radius + 10  # Adjust to fit in the top-right corner
 
+    #print (f"moonx: {x}, moony: {y}")
     # Draw the full moon as a base
-    pygame.draw.circle(surface, (200, 200, 200), (moon_x, moon_y), moon_radius)
+    # Colors
+    moon_color = (230, 230, 230)
+    shadow_color = (10, 10, 10)
 
-    # Determine shadow position based on phase
-    if moon_phase < 0.5:
-        # Waxing phases: Shadow on the left
-        shadow_x = MOON_X - int(moon_radius * (1 - 2 * moon_phase))
-    else:
-        # Waning phases: Shadow on the right
-        shadow_x = MOON_X + int(moon_radius * (2 * moon_phase - 1))
+    # Draw full moon base
+    pygame.draw.circle(surface, moon_color, (x, y), radius)
 
-    shadow_radius = MOON_RADIUS  # Keep the shadow the same size as the moon
-
-    # Draw the shadow using a black circle to "cover" part of the moon
-    pygame.draw.circle(surface, (0, 0, 0), (shadow_x, moon_y), shadow_radius)
+    # Overlay shadow based on phase
+    if moon_phase == 0:  # New Moon
+        pygame.draw.circle(surface, shadow_color, (x, y), radius)
+    elif moon_phase == 1:  # Waxing Crescent
+        pygame.draw.rect(surface, shadow_color, (x - radius, y - radius, radius, radius * 2))
+    elif moon_phase == 2:  # First Quarter
+        pygame.draw.rect(surface, shadow_color, (x, y - radius, radius, radius * 2))
+    elif moon_phase == 3:  # Waxing Gibbous
+        pygame.draw.ellipse(surface, shadow_color, (x, y - radius, radius, radius * 2))
+    elif moon_phase == 4:  # Full Moon (nothing to draw)
+        pass
+    elif moon_phase == 5:  # Waning Gibbous
+        pygame.draw.ellipse(surface, shadow_color, (x - radius, y - radius, radius, radius * 2))
+    elif moon_phase == 6:  # Third Quarter
+        pygame.draw.rect(surface, shadow_color, (x - radius, y - radius, radius, radius * 2))
+    elif moon_phase == 7:  # Waning Crescent
+        pygame.draw.rect(surface, shadow_color, (x, y - radius, radius, radius * 2))

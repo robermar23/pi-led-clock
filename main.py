@@ -3,24 +3,13 @@ import pygame
 import datetime
 import sys
 import time
-from util import setup_display, get_current_time, interpolate_color, get_config
+from util import setup_display, get_current_time, interpolate_color, get_config, draw_text
 from weather import get_weather, load_weather_icon
 from background import get_background_color, draw_background_gradient, get_sun_times
 from location import get_location
-
+from moon import draw_moon
 
 app = typer.Typer()
-
-# Function to draw glowing text
-def draw_text(surface, text, font, color, position, glow_color, glow_radius):
-    # Create the glow effect by blurring the text
-    glow_surface = font.render(text, True, glow_color)
-    for offset in range(1, glow_radius + 1):
-        glow_pos = (position[0] - offset, position[1] - offset)
-        surface.blit(glow_surface, glow_pos)
-    # Render the main text
-    text_surface = font.render(text, True, color)
-    surface.blit(text_surface, position)
 
 @app.command(
     context_settings={"ignore_unknown_options": True}
@@ -48,16 +37,18 @@ def start_clock(
     clock_font_size = int(screen_height * 0.3)  # Dynamic font size for the clock
     date_font_size = int(screen_height * 0.1)  # Smaller font size for the date
     weather_font_size = int(screen_height * 0.1)  # Font size for weather info
+    weather_det_font_size = int(screen_height * 0.05)
     clock_font = pygame.font.Font(pygame.font.match_font("arial"), clock_font_size)
     date_font = pygame.font.Font(pygame.font.match_font("arial"), date_font_size)
     weather_font = pygame.font.Font(pygame.font.match_font("arial"), weather_font_size)
+    weather_det_font = pygame.font.Font(pygame.font.match_font("arial"), weather_det_font_size)
 
     running = True
     clock = pygame.time.Clock()
     frame_count = 0
 
     # Fetch initial weather data
-    temp, feels_like, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
+    temp, feels_like, pressure, humidity, wind_speed, wind_deg, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
     if weather_reports:
         for report in weather_reports:
             report["weather_icon"] = load_weather_icon(report["image_url"])
@@ -80,7 +71,7 @@ def start_clock(
         # Update weather data every hour
         current_time = time.time()
         if current_time - last_weather_update >= 3600:  # 3600 seconds = 1 hour
-            temp, feels_like, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
+            temp, feels_like, pressure, humidity, wind_speed, wind_deg, weather_reports = get_weather(zip_code, country_code, open_weather_api_key)
             if weather_reports:
                 for report in weather_reports:
                     report["weather_icon"] = load_weather_icon(report["image_url"])
@@ -107,6 +98,8 @@ def start_clock(
         date_text_width, date_text_height = date_font.size(current_date)
         weather_text = f"{temp:.1f}°F, feels like {feels_like}°F" if temp is not None else "Weather Unavailable"
         weather_text_width, weather_text_height = weather_font.size(weather_text)
+        weather_det_text = f"Humiduty: {humidity}, Pressure: {pressure}, Wind Speed: {wind_speed}, Wind Deg: {wind_deg}"
+        weather_det_text_width, weather_det_text_height = weather_det_font.size(weather_det_text)
 
         clock_position = (
             (screen_width - clock_text_width) // 2,
@@ -120,6 +113,10 @@ def start_clock(
             (screen_width - weather_text_width) // 2,
             date_position[1] + date_text_height + 20,
         )
+        weather_det_position = (
+            (screen_width - weather_det_text_width) // 2,
+            weather_position[1] + weather_text_height + 20
+        )
         
         if weather_reports:
             weather_report_base_x = 10
@@ -130,7 +127,7 @@ def start_clock(
 
          # Draw the moon only at night
         if now < sun_rise or now > sun_set:
-            draw_moon(screen, timezone)
+            draw_moon(screen, location.timezone)
 
         # Draw time and date with glow
         draw_text(screen,current_time,clock_font,(255, 255, 255),clock_position,(0, 0, 0),3)
@@ -138,6 +135,8 @@ def start_clock(
         draw_text(screen,current_date,date_font,(255, 255, 255),date_position,(0, 0, 0), 2)
 
         draw_text(screen, weather_text, weather_font, (255, 255, 255), weather_position, (0, 0, 0), 2)
+        
+        draw_text(screen, weather_det_text, weather_det_font, (255, 255, 255), weather_det_position, (0, 0, 0), 2)
 
         # Update display
         pygame.display.flip()

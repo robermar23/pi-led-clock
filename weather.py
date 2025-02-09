@@ -11,12 +11,17 @@ BASE_IMAGE_URL = "https://openweathermap.org/img/wn/"
 # Function to fetch weather data
 def get_weather(zip_code, country_code, api_key):
     try:
+        print (f"Determining weather for {zip_code}...")
         url = f"{BASE_URL}?zip={zip_code},{country_code}&appid={api_key}&units=imperial"
         response = requests.get(url)
         response.raise_for_status()
         data = response.json()
         temp = data["main"]["temp"]
+        pressure = data["main"]["pressure"]
+        humidity = data["main"]["humidity"]
         feels_like = data["main"]["feels_like"]
+        wind_speed = data["wind"]["speed"]
+        wind_deg = data["wind"]["deg"]
         reports = []
         for report in data["weather"]:
             weather = report["main"].lower()  # e.g., "clear", "clouds", "rain"
@@ -28,10 +33,10 @@ def get_weather(zip_code, country_code, api_key):
                             "image_url": image_url
                             })
             
-        return temp, feels_like, reports
+        return temp, feels_like, pressure, humidity, wind_speed, wind_deg, reports
     except Exception as e:
         print(f"Error fetching weather data: {e}")
-        return None, None, None
+        return None, None, None, None, None, None
 
 def load_weather_icon(url):
     """Download the weather icon from OpenWeatherMap and return as a Pygame surface."""

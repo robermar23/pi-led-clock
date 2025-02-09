@@ -66,3 +66,14 @@ def get_config(file_path = "config.json"):
         data = json.load(file)
     
     return json.loads(json.dumps(data), object_hook=lambda d: SimpleNamespace(**d))
+
+# Function to draw glowing text
+def draw_text(surface, text, font, color, position, glow_color, glow_radius):
+    # Create the glow effect by blurring the text
+    glow_surface = font.render(text, True, glow_color)
+    for offset in range(1, glow_radius + 1):
+        glow_pos = (position[0] - offset, position[1] - offset)
+        surface.blit(glow_surface, glow_pos)
+    # Render the main text
+    text_surface = font.render(text, True, color)
+    surface.blit(text_surface, position)
