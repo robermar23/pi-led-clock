@@ -105,7 +105,7 @@ def _load_fonts(screen_height):
     clock_font_size = int(screen_height * 0.3)
     date_font_size = int(screen_height * 0.1)
     weather_font_size = int(screen_height * 0.1)
-    weather_det_font_size = int(screen_height * 0.05)
+    weather_det_font_size = int(screen_height * 0.03)
     clock_font = pygame.font.Font(pygame.font.match_font("arial"), clock_font_size)
     date_font = pygame.font.Font(pygame.font.match_font("arial"), date_font_size)
     weather_font = pygame.font.Font(pygame.font.match_font("arial"), weather_font_size)
