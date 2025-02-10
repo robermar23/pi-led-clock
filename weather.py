@@ -10,6 +10,11 @@ BASE_IMAGE_URL = "https://openweathermap.org/img/wn/"
 
 # Function to fetch weather data
 def get_weather(zip_code, country_code, api_key):
+    """Fetch weather data from OpenWeatherMap based on zip code.
+
+    Retrieves temperature, feels-like temperature, pressure, humidity, wind speed,
+    wind direction, and weather reports from the OpenWeatherMap API.
+    """
     try:
         print (f"Determining weather for {zip_code}...")
         url = f"{BASE_URL}?zip={zip_code},{country_code}&appid={api_key}&units=imperial"

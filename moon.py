@@ -8,7 +8,7 @@ def get_moon_phase(timezone):
     now = datetime.datetime.now(pytz.timezone(timezone))
     moon_phase = ephem.Moon(now).phase  # Returns 0 to 29.53
     #return moon_phase / 29.53  # Normalize to 0-1 scale
-    return moon_phase % 8
+    return moon_phase % 10
 
 def draw_moon(surface, timezone):
     """Draw the moon with the correct phase."""
@@ -31,6 +31,8 @@ def draw_moon(surface, timezone):
 
     # Draw full moon base
     pygame.draw.circle(surface, moon_color, (x, y), radius)
+
+    moon_phase = int(moon_phase)  # Convert to integer for switch statement
 
     # Overlay shadow based on phase
     if moon_phase == 0:  # New Moon

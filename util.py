@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,9 +10,13 @@ from types import SimpleNamespace
 BLACK = (0, 0, 0)
 
 def get_current_time(utc_offset: int):
-  offset = timezone(timedelta(hours=utc_offset))
-  now = datetime.now(offset)
-  return now
+    """Get the current time with a specified UTC offset.
+
+    Calculates the current time adjusted for the given UTC offset.
+    """
+    offset = timezone(timedelta(hours=utc_offset))
+    now = datetime.now(offset)
+    return now
 
 def setup_display(display: str, video_driver: str, screen_width: int, screen_height: int):
     """
@@ -21,7 +26,7 @@ def setup_display(display: str, video_driver: str, screen_width: int, screen_hei
     os.putenv("SDL_VIDEODRIVER", video_driver)
 
     pygame.init()
-    
+
     # Detect platform
     platform = sys.platform
     print(f"Running on platform: {platform}")
@@ -30,20 +35,20 @@ def setup_display(display: str, video_driver: str, screen_width: int, screen_hei
         pygame.display.init()
         size = (screen_width, screen_height)
         screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
-        screen.fill(BLACK)
         pygame.font.init()
         pygame.display.update()
+
     elif platform.startswith("win"):
         print("Running on Windows, using sdl2")
         os.putenv("SDL_VIDEODRIVER", "")
         pygame.display.init()
         # Get screen resolution of the selected display
         display_info = pygame.display.Info()
-        #print(f"Display info: {display_info}")
-        width = display_info.current_w
         display_index = int(display)
-        # Position the window manually to support 2 displays atm
+            # Position the window manually to support 2 displays atm
         if display_index == 1:  # Second monitor
+            #print(f"Display info: {display_info}")
+            width = display_info.current_w
             os.environ['SDL_VIDEO_WINDOW_POS'] = f"{width},0"  # Place at the start of the second screen
         else:  # Primary monitor
             os.environ['SDL_VIDEO_WINDOW_POS'] = "0,0"
@@ -69,7 +74,12 @@ def get_config(file_path = "config.json"):
 
 # Function to draw glowing text
 def draw_text(surface, text, font, color, position, glow_color, glow_radius):
-    # Create the glow effect by blurring the text
+    """Draw text with a glow effect on a surface.
+
+    Renders the given text with a specified glow, by blurring the text using
+    multiple blits with an offset.
+    """
+    
     glow_surface = font.render(text, True, glow_color)
     for offset in range(1, glow_radius + 1):
         glow_pos = (position[0] - offset, position[1] - offset)
