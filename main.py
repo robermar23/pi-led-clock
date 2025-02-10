@@ -105,7 +105,7 @@ def _load_fonts(screen_height):
     clock_font_size = int(screen_height * 0.3)
     date_font_size = int(screen_height * 0.1)
     weather_font_size = int(screen_height * 0.1)
-    weather_det_font_size = int(screen_height * 0.03)
+    weather_det_font_size = int(screen_height * 0.04)
     clock_font = pygame.font.Font(pygame.font.match_font("arial"), clock_font_size)
     date_font = pygame.font.Font(pygame.font.match_font("arial"), date_font_size)
     weather_font = pygame.font.Font(pygame.font.match_font("arial"), weather_font_size)
@@ -147,7 +147,7 @@ def _calculate_text_positions(screen, now, weather_data, clock_font, date_font, 
     date_str = now.strftime("%A, %B %d, %Y")
     temp, feels_like, pressure, humidity, wind_speed, wind_deg, _ = weather_data
     weather_text = f"{temp:.1f}°F, feels like {feels_like}°F" if temp is not None else "Weather Unavailable"
-    weather_det_text = f"Humidity: {humidity}, Pressure: {pressure}, Wind Speed: {wind_speed}, Wind Deg: {wind_deg}"
+    weather_det_text = f"Humidity: {humidity}, Pressure: {pressure}, Wind {wind_speed} {wind_deg}"
 
     clock_text_width, clock_text_height = clock_font.size(time_str)
     date_text_width, date_text_height = date_font.size(date_str)

@@ -27,6 +27,7 @@ def get_weather(zip_code, country_code, api_key):
         feels_like = data["main"]["feels_like"]
         wind_speed = data["wind"]["speed"]
         wind_deg = data["wind"]["deg"]
+        wind_dir = _wind_direction(wind_deg, 16)
         reports = []
         for report in data["weather"]:
             weather = report["main"].lower()  # e.g., "clear", "clouds", "rain"
@@ -38,7 +39,7 @@ def get_weather(zip_code, country_code, api_key):
                             "image_url": image_url
                             })
             
-        return temp, feels_like, pressure, humidity, wind_speed, wind_deg, reports
+        return temp, feels_like, pressure, humidity, wind_speed, wind_dir, reports
     except Exception as e:
         print(f"Error fetching weather data: {e}")
         return None, None, None, None, None, None
@@ -53,3 +54,23 @@ def load_weather_icon(url):
     except requests.RequestException as e:
         print(f"Failed to load weather icon: {e}")
         return None
+    
+def _wind_direction(degrees, precision=8):
+    """
+    Converts wind direction in degrees (0-360) to a compass direction.
+    
+    :param degrees: Wind direction in degrees from OpenWeatherMap.
+    :param precision: 8 for basic compass (N, NE, etc.), 16 for detailed (NNE, ENE, etc.).
+    :return: Compass direction as a string.
+    """
+    compass_8 = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    compass_16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+    
+    if precision == 8:
+        index = round(degrees / 45) % 8
+        return compass_8[index]
+    elif precision == 16:
+        index = round(degrees / 22.5) % 16
+        return compass_16[index]
+    else:
+        raise ValueError("Precision must be 8 or 16")
