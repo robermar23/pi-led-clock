@@ -21,7 +21,7 @@ def get_current_time(utc_offset: int):
 
 def get_current_time(timezone_name: str):
     tz = pytz.timezone(timezone_name)
-    now = datetime.datetime.now(tz)
+    now = datetime.now(tz)
     return now
 
 def setup_display(display: str, video_driver: str, screen_width: int, screen_height: int):
