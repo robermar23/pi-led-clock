@@ -36,10 +36,10 @@ python main.py --help
 
 #### Linux
 
-Render on the default 800x480 led screen, showing weather and time for Washington, DC, US
+Render on the default 800x480 led screen, showing weather and time for America/New_York timezone
 
 ```sh
-poetry run main.py -- ':0' 'x11' 800 480 -5 '20001' 'us' 'YOUR-OPENWEATHERMAP-API-KEY'
+poetry run main.py -- ':0' 'x11' 800 480 'America/New_York' '20001' 'us' 'YOUR-OPENWEATHERMAP-API-KEY'
 ```
 
 #### Windows
@@ -47,5 +47,5 @@ poetry run main.py -- ':0' 'x11' 800 480 -5 '20001' 'us' 'YOUR-OPENWEATHERMAP-AP
 Render on the second display, in a 700x400 box at the top left of the screen, showing weather and time for Australia Fair, Queensland
 
 ```sh
-python main.py -- '1' 'directx' 700 400 0 '4215' 'au' 'YOUR-OPENWEATHERMAP-API-KEY'
+python main.py -- '1' 'directx' 700 400 'Australia/Brisbane' '4215' 'au' 'YOUR-OPENWEATHERMAP-API-KEY'
 ```
