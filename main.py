@@ -18,10 +18,11 @@ def start_clock(
     video_driver: str = typer.Argument("x11", help="Video driver to use (e.g., 'x11')"),
     screen_width: int = typer.Argument(800, help="Screen width (e.g., 800)"),
     screen_height: int = typer.Argument(480, help="Screen height (e.g., 480)"),
-    utc_offset: int = typer.Argument(-5, help="UTC Offset for clock"),
+    timezone_name: str = typer.Argument("UTC", help="Timezone for the clock"),
     zip_code: str = typer.Argument("xxxxx", help="Zipcode to determine weather for"),
     country_code: str = typer.Argument("us", help="Country code to determine weather for"),
-    open_weather_api_key: str = typer.Argument("xxx", help="openweathermap.org api key")
+    open_weather_api_key: str = typer.Argument("xxx", help="openweathermap.org api key"),
+
 ):
     """
     Start the clock
@@ -64,7 +65,7 @@ def start_clock(
         draw_background_gradient(screen, screen_height, screen_width, *background_colors)
 
         # Get current time and date
-        now = get_current_time(utc_offset)
+        now = get_current_time(timezone_name)
         time_str = now.strftime("%H:%M:%S")
         date_str = now.strftime("%A, %B %d, %Y")
         
