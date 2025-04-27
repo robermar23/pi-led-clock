@@ -32,28 +32,35 @@ def get_background_color(location, sunrise, sunset):
     
     if now < dawn_start:
         # Deep night
+        print("Deep night")
         return color_night
     elif dawn_start <= now < sunrise:
         # Dawn transition
+        print("Dawn transition")
         factor = (now - dawn_start).total_seconds() / (sunrise - dawn_start).total_seconds()
         return interpolate_color(color_night, color_dawn, factor)
     elif sunrise <= now < (sunrise + datetime.timedelta(minutes=30)):
         # Morning transition
+        print("Morning transition")
         factor = (now - sunrise).total_seconds() / (30 * 60)
         return interpolate_color(color_dawn, color_day, factor)
     elif (sunrise + datetime.timedelta(minutes=30)) <= now < (sunset - datetime.timedelta(minutes=30)):
         # Daytime
+        print("Daytime")
         return color_day
     elif (sunset - datetime.timedelta(minutes=30)) <= now < sunset:
         # Pre-sunset transition
+        print("Pre-sunset transition")
         factor = (now - (sunset - datetime.timedelta(minutes=30))).total_seconds() / (30 * 60)
         return interpolate_color(color_day, color_sunset, factor)
     elif sunset <= now < dusk_end:
         # Sunset to night transition
+        print("Sunset to night transition")
         factor = (now - sunset).total_seconds() / (dusk_end - sunset).total_seconds()
         return interpolate_color(color_sunset, color_night, factor)
     else:
         # Night
+        print("Night")
         return color_night
 
 
