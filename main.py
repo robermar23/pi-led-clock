@@ -2,11 +2,15 @@ import typer
 import pygame
 import sys
 import time
+import random
 from util import setup_display, get_current_time, interpolate_color, get_config, draw_text
 from weather import get_weather, load_weather_icon
-from background import get_background_color, draw_background_gradient, get_sun_times
+from background import get_background_color, draw_background_gradient, get_sun_times, draw_starry_sky, draw_cloudy_night
 from location import get_location
 from moon import draw_moon
+from cloud import Cloud
+from star import Star
+from raindrop import Raindrop
 
 app = typer.Typer()
 
@@ -46,6 +50,9 @@ def start_clock(
     location = get_location()
     sun_rise, sun_set = get_sun_times(location)
     background_colors = _get_background_colors(location, sun_rise, sun_set)
+    
+    clouds = create_clouds(screen_width, screen_height)
+    stars = create_stars(screen_width, screen_height)
 
     while running:
         # Handle events
@@ -77,6 +84,9 @@ def start_clock(
 
         _draw_weather_icons(screen, weather_data)
         
+        if now < sun_rise or now > sun_set:
+            _draw_night_effects(screen, screen_width, screen_height, weather_data[6][0]["weather"], clouds, stars)
+        
         # Draw the moon only at night
         if now < sun_rise or now > sun_set:
             draw_moon(screen, location.timezone)
@@ -95,6 +105,14 @@ def start_clock(
 
     pygame.quit()
     sys.exit()
+
+def _draw_night_effects(screen, width, height, weather_condition, clouds, stars):
+    if weather_condition in ["clear", "clear sky"]:
+        draw_starry_sky(screen, width, height, stars)
+    elif weather_condition in ["clouds", "overcast clouds", "broken clouds"]:
+        draw_cloudy_night(screen, width, height, clouds)
+    
+
 
 def _load_fonts(screen_height):
     """Load fonts with sizes relative to the screen height.
@@ -133,6 +151,9 @@ def _get_background_colors(location, sun_rise, sun_set):
     """
     background_top_color = get_background_color(location, sun_rise, sun_set)
     background_bottom_color = interpolate_color(background_top_color, (0, 0, 0), 0.5)
+    
+    print(f"Background Top Color: {background_top_color}, Bottom Color: {background_bottom_color}")
+    
     return background_top_color, background_bottom_color
 
 
@@ -196,6 +217,41 @@ def _draw_weather_icons(screen, weather_data):
             screen.blit(report["weather_icon"], (weather_report_base_x, weather_report_base_y))
             weather_report_base_x = weather_report_base_y = (weather_report_base_x + 110)
             
+
+def create_clouds(width, height, count=8):
+    clouds = []
+    for _ in range(count):
+        x = random.randint(0, width)
+        y = random.randint(0, height // 2)
+        w = random.randint(100, 250)
+        h = random.randint(40, 100)
+        alpha = random.randint(30, 70)
+        speed_x = random.uniform(0.03, 0.12)  # very slow drift
+        clouds.append(Cloud(x, y, w, h, alpha, speed_x))
+    return clouds
+
+def create_stars(width, height, count=100):
+    stars = []
+    for _ in range(count):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        radius = random.choice([1, 2])
+        color = random.choice([(255, 255, 255), (255, 255, 200)])
+        stars.append(Star(x, y, radius, color))
+    return stars
+
+def create_raindrops(width, height, count=75):
+    raindrops = []
+    for _ in range(count):
+        x = random.randint(0, width)
+        y = random.randint(-height, 0)
+        length = random.randint(5, 15)
+        speed = random.uniform(2, 5)
+        raindrops.append(Raindrop(x, y, length, speed))
+    return raindrops
+
+
+
 if __name__ == "__main__":
     app()
 

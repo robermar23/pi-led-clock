@@ -1,10 +1,13 @@
 import pygame
 import datetime
 import pytz
+import random
 from astral import LocationInfo
 from astral.sun import sun
 from colorsys import rgb_to_hsv, hsv_to_rgb
 from util import interpolate_color
+from cloud import Cloud
+from star import Star
 
 def get_sun_times(location):
     """Retrieve sunrise and sunset times for the current day."""
@@ -25,6 +28,8 @@ def get_background_color(location, sunrise, sunset):
     dawn_start = sunrise - datetime.timedelta(minutes=45)
     dusk_end = sunset + datetime.timedelta(minutes=45)
 
+    print (f"Current time: {now}, Sunrise: {sunrise}, Sunset: {sunset}, Dawn start: {dawn_start}, Dusk end: {dusk_end}")
+    
     if now < dawn_start:
         # Deep night
         return color_night
@@ -59,3 +64,43 @@ def draw_background_gradient(surface, screen_height, screen_width, top_color, bo
         color = interpolate_color(top_color, bottom_color, factor)
         pygame.draw.line(surface, color, (0, y), (screen_width, y))
 
+# def draw_starry_sky(screen, width, height, star_count=100):
+#     #screen.fill((10, 10, 30))  # dark night blue
+#     for _ in range(star_count):
+#         x = random.randint(0, width)
+#         y = random.randint(0, height)
+#         radius = random.choice([1, 2])
+#         color = random.choice([(255, 255, 255), (255, 255, 200)])  # white to pale yellow
+#         pygame.draw.circle(screen, color, (x, y), radius)
+
+# def draw_cloudy_night(screen, width, height):
+#     #base_color = (20, 20, 40)  # darker bluish-grey
+#     #screen.fill(base_color)
+#     cloud_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+
+#     for _ in range(8):  # number of clouds
+#         x = random.randint(0, width)
+#         y = random.randint(0, height // 2)  # top half only
+#         w = random.randint(100, 250)
+#         h = random.randint(40, 100)
+#         alpha = random.randint(30, 70)
+#         color = (100, 100, 120, alpha)  # soft grey with alpha
+#         pygame.draw.ellipse(cloud_surface, color, (x, y, w, h))
+
+    #screen.blit(cloud_surface, (0, 0))
+
+def draw_cloudy_night(screen, width, height, clouds):
+    #screen.fill((20, 20, 40))  # base night color
+    cloud_surface = pygame.Surface((width, height), pygame.SRCALPHA)
+    
+    for cloud in clouds:
+        cloud.update(width)
+        cloud.draw(cloud_surface)
+
+    screen.blit(cloud_surface, (0, 0))
+
+def draw_starry_sky(screen, width, height, stars):
+    #screen.fill((10, 10, 30))  # deep night sky
+    for star in stars:
+        star.update()
+        star.draw(screen)
