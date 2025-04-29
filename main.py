@@ -67,6 +67,7 @@ def start_clock(
         if current_time - last_weather_update >= 3600:  # 3600 seconds = 1 hour
             weather_data = _update_weather(zip_code, country_code, open_weather_api_key)
             last_weather_update = current_time
+            sun_rise, sun_set = get_sun_times(location)
             background_colors = _get_background_colors(location,  sun_rise, sun_set)
             
         draw_background_gradient(screen, screen_height, screen_width, *background_colors)
